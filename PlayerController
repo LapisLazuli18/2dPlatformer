@@ -1,0 +1,41 @@
+public float MoveSpeed;
+
+    public float JumpStrength;
+    Rigidbody2D Myrigid;
+
+    void Start()
+    {
+        Myrigid = GetComponent<Rigidbody2D>();//What the script uses to reference the in-game body.
+    }
+
+    void Update()
+    {
+        //Uses the MoveSpeed var to move the player.
+        Myrigid.velocity = new Vector2(Input.GetAxis("Horizontal") * MoveSpeed * Time.deltaTime, Myrigid.velocity.y);
+
+        //Draws a raycast line to determine if the player is touching the floor or not.
+        Debug.DrawLine(transform.position, transform.position + new Vector3(0, -0.5f, 0), Color.blue);
+
+        //if Space bar is pressed...
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            //is player touching the floor?
+            if (Physics2D.Linecast(transform.position, transform.position + new Vector3(0, -1.5f, 0), 1 << LayerMask.NameToLayer("Land")))
+            {
+                //Applies JumpStrength var
+                Myrigid.AddForce(new Vector2(0, JumpStrength));
+            }
+        }
+
+        //Goomba Stomp Code. Could be useful for downward strike attack?
+        //Creates the "Hit" function, triggered if the raycast made earler detects an enemy.
+        RaycastHit2D Hit = Physics2D.Raycast(transform.position, Vector2.down, 1.5f, 1 << LayerMask.NameToLayer("Enemies"));
+        //if Enemy is detected...
+        if (Hit)
+        {
+            //Turns off the enemy and causes the player to bounce off the enemy
+            Hit.transform.gameObject.SetActive(false);
+            Myrigid.velocity = new Vector2(Myrigid.velocity.x, 0);
+            Myrigid.AddForce(new Vector2(0, JumpStrength));
+        }
+    }
